@@ -25,6 +25,23 @@
 <body>@gooblet234 2025</body><br>
 <a href="https://forms.gle/YzZHbZAZRggxNdbv8">+ link</a><br>
 
+<script>
+  const encodedPasswords = ["MjM0MTQyMzQ=", "R01TMjAyNQ=="];
+
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const passwordFromUrl = urlParams.get('password');
+
+    if (!passwordFromUrl || !encodedPasswords.includes(passwordFromUrl)) {
+      alert("Access denied. Improper request. ERR:202");
+      window.location.href = "index.html";
+    }
+  });
+</script>
+
+</html>
+
+
 
 
 
