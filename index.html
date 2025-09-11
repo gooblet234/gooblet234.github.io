@@ -3,20 +3,29 @@
 <h1>PASSWORD PROTECTED PAGE</h1><br>
 <body>changes every friday. Consult me in person or thru text to get new password.</body><br>
 <form>
-<input name="pass" id="pass" type="password" placeholder="secret password">
-<input type="button" value="Submit" onclick="myFunction()">
+  <input name="pass" id="pass" type="password" placeholder="secret password" required>
+  <input type="button" value="Submit" onclick="myFunction()">
 </form> 
 
 
 <script>
 function myFunction(){
-  var pass = document.getElementById("pass").value;
+  const encodedPasswords = ["MjM0MTQyMzQ=", "R01TMjAyNQ=="];
 
-if(pass == "29310293","incorrect"){
-            window.location.href="main.html";
-   }else{
+  const userInput = document.getElementById("pass").value;
+
+  if (userInput.trim() === "") {
+    alert("Please enter a password.");
+    return; 
+  }
+
+  const encodedInput = btoa(userInput);
+
+  if (encodedPasswords.includes(encodedInput)) {
+    window.location.href = "main.html";
+  } else {
     alert("Password is incorrect.");
-    }
+  }
 }
 </script>
 </html>
