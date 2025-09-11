@@ -9,23 +9,25 @@
 
 
 <script>
-function myFunction(){
+function myFunction() {
   const encodedPasswords = ["MjM0MTQyMzQ=", "R01TMjAyNQ=="];
 
   const userInput = document.getElementById("pass").value;
 
   if (userInput.trim() === "") {
     alert("Please enter a password.");
-    return; 
+    return;
   }
 
   const encodedInput = btoa(userInput);
 
   if (encodedPasswords.includes(encodedInput)) {
-    window.location.href = "main.html";
+    sessionStorage.setItem('password', encodedInput);
+    window.location.href = "main.html; // Replace with your secured page
   } else {
     alert("Password is incorrect.");
   }
 }
 </script>
+</html>
 </html>
