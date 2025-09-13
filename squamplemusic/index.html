@@ -35,25 +35,23 @@
         <!-- Custom Audio Player -->
         <div id="customPlayer">
             <button id="playPause" class="icon-btn">
-                <svg id="playIcon" width="24" height="24" viewBox="0 0 24 24" fill="white">
-                    <path id="playPath" d="M5 3 L19 12 L5 21 Z"></path>
+                <svg id="playIcon" width="36" height="36" viewBox="0 0 24 24" fill="white">
+                    <polygon points="5,3 19,12 5,21"></polygon>
                 </svg>
             </button>
             <input id="volume" type="range" min="0" max="1" step="0.01" value="0.8">
+            <button id="toggleEQ" class="panel-btn">EQ <span class="arrow">▼</span></button>
+            <button id="toggleSpeedPitch" class="panel-btn">Speed/Pitch <span class="arrow">▼</span></button>
 
-            <!-- EQ Panel -->
-            <button id="toggleEQ" class="panel-btn">EQ <span id="eqArrow">▼</span></button>
             <div id="eqPanel" class="hidden">
                 <label>Low: <input type="range" min="-30" max="30" value="0" id="eqLow"></label>
                 <label>Mid: <input type="range" min="-30" max="30" value="0" id="eqMid"></label>
                 <label>High: <input type="range" min="-30" max="30" value="0" id="eqHigh"></label>
             </div>
 
-            <!-- Pitch & Speed Panel -->
-            <button id="togglePitch" class="panel-btn">Speed/Pitch <span id="pitchArrow">▼</span></button>
-            <div id="pitchPanel" class="hidden">
-                <label>Speed: <input type="range" min="0.5" max="2" value="1" step="0.01" id="speedControl"></label>
-                <label>Pitch (semitones): <input type="range" min="-12" max="12" value="0" step="1" id="pitchControl"></label>
+            <div id="speedPitchPanel" class="hidden">
+                <label>Speed: <input type="range" min="0.5" max="2" step="0.01" value="1" id="speedControl"></label>
+                <label>Pitch: <input type="range" min="-1200" max="1200" step="1" value="0" id="pitchControl"></label>
             </div>
         </div>
 
@@ -72,11 +70,11 @@ const albumSelect = document.getElementById('albumSelect');
 const albumCover = document.getElementById('albumCover');
 const trackList = document.getElementById('trackList');
 
-let audioCtx, sourceNode, gainNode, eqNodes = {}, buffer;
+let audioCtx, sourceNode, gainNode, eqNodes = {}, pitchNode, buffer;
 let isPlaying = false;
 
 const playPauseBtn = document.getElementById('playPause');
-const playPath = document.getElementById('playPath');
+const playIcon = document.getElementById('playIcon');
 const volumeControl = document.getElementById('volume');
 const eqLow = document.getElementById('eqLow');
 const eqMid = document.getElementById('eqMid');
@@ -84,12 +82,15 @@ const eqHigh = document.getElementById('eqHigh');
 const speedControl = document.getElementById('speedControl');
 const pitchControl = document.getElementById('pitchControl');
 const eqPanel = document.getElementById('eqPanel');
-const pitchPanel = document.getElementById('pitchPanel');
-const eqArrow = document.getElementById('eqArrow');
-const pitchArrow = document.getElementById('pitchArrow');
+const speedPitchPanel = document.getElementById('speedPitchPanel');
 
+// --- Utility ---
 function sanitizeName(name) {
-    return name.replace(/'/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return name
+        .replace(/'/g, '')                  
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')        
+        .replace(/^-+|-+$/g, '');
 }
 
 // Populate artist dropdown
@@ -143,12 +144,11 @@ async function updateSongs() {
 
 artistSelect.addEventListener('change', updateAlbums);
 albumSelect.addEventListener('change', updateSongs);
+
 artistSelect.selectedIndex = 0;
 updateAlbums();
 
 // --- Web Audio API Player ---
-let pitchNode;
-
 async function loadAudio(url) {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -162,39 +162,43 @@ async function loadAudio(url) {
 
     gainNode = audioCtx.createGain();
 
+    // EQ nodes
     eqNodes.low = audioCtx.createBiquadFilter();
-    eqNodes.low.type = "lowshelf"; eqNodes.low.frequency.value = 200;
+    eqNodes.low.type = "lowshelf";
+    eqNodes.low.frequency.value = 200;
     eqNodes.mid = audioCtx.createBiquadFilter();
-    eqNodes.mid.type = "peaking"; eqNodes.mid.frequency.value = 1000; eqNodes.mid.Q.value = 1;
+    eqNodes.mid.type = "peaking";
+    eqNodes.mid.frequency.value = 1000;
+    eqNodes.mid.Q.value = 1;
     eqNodes.high = audioCtx.createBiquadFilter();
-    eqNodes.high.type = "highshelf"; eqNodes.high.frequency.value = 5000;
+    eqNodes.high.type = "highshelf";
+    eqNodes.high.frequency.value = 5000;
 
-    pitchNode = audioCtx.createGain();
+    // Pitch Node
+    pitchNode = audioCtx.createGain(); // placeholder for pitch control via playbackRate
 
+    // Connect nodes
     sourceNode.connect(eqNodes.low);
     eqNodes.low.connect(eqNodes.mid);
     eqNodes.mid.connect(eqNodes.high);
-    eqNodes.high.connect(pitchNode);
-    pitchNode.connect(gainNode);
+    eqNodes.high.connect(gainNode);
     gainNode.connect(audioCtx.destination);
 
     sourceNode.playbackRate.value = speedControl.value;
-    sourceNode.detune.value = pitchControl.value * 100;
     isPlaying = false;
 }
 
-// --- Play/Pause Icon Morph ---
+// --- Play/Pause Icon Toggle ---
 playPauseBtn.addEventListener('click', () => {
     if (!buffer) return;
-
     if (!isPlaying) {
         sourceNode.start(0);
         isPlaying = true;
-        playPath.setAttribute('d', 'M5 3 H9 V21 H5 Z M15 3 H19 V21 H15 Z'); // pause shape
+        playIcon.innerHTML = '<rect x="5" y="3" width="4" height="18"></rect><rect x="15" y="3" width="4" height="18"></rect>';
     } else {
         sourceNode.stop();
         isPlaying = false;
-        playPath.setAttribute('d', 'M5 3 L19 12 L5 21 Z'); // play shape
+        playIcon.innerHTML = '<polygon points="5,3 19,12 5,21"></polygon>';
     }
 });
 
@@ -203,16 +207,26 @@ volumeControl.addEventListener('input', () => gainNode.gain.value = volumeContro
 eqLow.addEventListener('input', () => eqNodes.low.gain.value = eqLow.value);
 eqMid.addEventListener('input', () => eqNodes.mid.gain.value = eqMid.value);
 eqHigh.addEventListener('input', () => eqNodes.high.gain.value = eqHigh.value);
-speedControl.addEventListener('input', () => { if(sourceNode) sourceNode.playbackRate.value = speedControl.value; });
-pitchControl.addEventListener('input', () => { if(sourceNode) sourceNode.detune.value = pitchControl.value * 100; });
 
+speedControl.addEventListener('input', () => {
+    if (sourceNode) sourceNode.playbackRate.value = speedControl.value;
+});
+
+pitchControl.addEventListener('input', () => {
+    if (sourceNode) {
+        // 1 semitone = 100 cents; playbackRate = 2^(cents/1200)
+        sourceNode.playbackRate.value = speedControl.value * Math.pow(2, pitchControl.value / 1200);
+    }
+});
+
+// --- Panel toggles ---
 document.getElementById('toggleEQ').addEventListener('click', () => {
     eqPanel.classList.toggle('hidden');
-    eqArrow.classList.toggle('rotated');
+    document.querySelector('#toggleEQ .arrow').classList.toggle('rotated');
 });
-document.getElementById('togglePitch').addEventListener('click', () => {
-    pitchPanel.classList.toggle('hidden');
-    pitchArrow.classList.toggle('rotated');
+document.getElementById('toggleSpeedPitch').addEventListener('click', () => {
+    speedPitchPanel.classList.toggle('hidden');
+    document.querySelector('#toggleSpeedPitch .arrow').classList.toggle('rotated');
 });
 </script>
 
