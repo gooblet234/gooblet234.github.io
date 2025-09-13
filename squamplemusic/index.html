@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Squample Music</title>
-<link rel="icon" href="squample.svg" type="image/x-icon">
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Squample Music</title>
+    <link rel="icon" href="squample.svg" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -32,28 +32,11 @@
             </div>
         </div>
 
-        <!-- Custom Audio Player -->
-        <div id="customPlayer">
-            <button id="playPause" class="icon-btn">
-                <svg id="playIcon" width="36" height="36" viewBox="0 0 24 24" fill="white">
-                    <polygon points="5,3 19,12 5,21"></polygon>
-                </svg>
-            </button>
-            <input id="volume" type="range" min="0" max="1" step="0.01" value="0.8">
-            <button id="toggleEQ" class="panel-btn">EQ <span class="arrow">▼</span></button>
-            <button id="toggleSpeedPitch" class="panel-btn">Speed/Pitch <span class="arrow">▼</span></button>
-
-            <div id="eqPanel" class="hidden">
-                <label>Low: <input type="range" min="-30" max="30" value="0" id="eqLow"></label>
-                <label>Mid: <input type="range" min="-30" max="30" value="0" id="eqMid"></label>
-                <label>High: <input type="range" min="-30" max="30" value="0" id="eqHigh"></label>
-            </div>
-
-            <div id="speedPitchPanel" class="hidden">
-                <label>Speed: <input type="range" min="0.5" max="2" step="0.01" value="1" id="speedControl"></label>
-                <label>Pitch: <input type="range" min="-1200" max="1200" step="1" value="0" id="pitchControl"></label>
-            </div>
-        </div>
+        <!-- Audio player -->
+        <audio id="player" controls class="audio-player">
+            <source id="audioSource" src="" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
 
         <!-- Tracklist -->
         <div id="trackList" class="tracklist"></div>
@@ -61,173 +44,86 @@
 </div>
 
 <script>
-const library = {
-    "Tyler The Creator": ["DON'T TAP THE GLASS"]
-};
+    const library = {
+        "Tyler The Creator": ["DON'T TAP THE GLASS"]//add a comma here right before the first / if you wish to add more entries! :D
+    };
 
-const artistSelect = document.getElementById('artistSelect');
-const albumSelect = document.getElementById('albumSelect');
-const albumCover = document.getElementById('albumCover');
-const trackList = document.getElementById('trackList');
+    const artistSelect = document.getElementById('artistSelect');
+    const albumSelect = document.getElementById('albumSelect');
+    const player = document.getElementById('player');
+    const audioSource = document.getElementById('audioSource');
+    const albumCover = document.getElementById('albumCover');
+    const trackList = document.getElementById('trackList');
 
-let audioCtx, sourceNode, gainNode, eqNodes = {}, pitchNode, buffer;
-let isPlaying = false;
+    function sanitizeName(name) {
+        return name
+            .toLowerCase()                       // lowercase
+            .replace(/[^a-z0-9]+/g, '-')         // replace non-alphanumerics with dash
+            .replace(/^-+|-+$/g, '');            // remove leading/trailing dashes
+    }
 
-const playPauseBtn = document.getElementById('playPause');
-const playIcon = document.getElementById('playIcon');
-const volumeControl = document.getElementById('volume');
-const eqLow = document.getElementById('eqLow');
-const eqMid = document.getElementById('eqMid');
-const eqHigh = document.getElementById('eqHigh');
-const speedControl = document.getElementById('speedControl');
-const pitchControl = document.getElementById('pitchControl');
-const eqPanel = document.getElementById('eqPanel');
-const speedPitchPanel = document.getElementById('speedPitchPanel');
-
-// --- Utility ---
-function sanitizeName(name) {
-    return name
-        .replace(/'/g, '')                  
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')        
-        .replace(/^-+|-+$/g, '');
-}
-
-// Populate artist dropdown
-for (const artist in library) {
-    const option = document.createElement('option');
-    option.value = artist;
-    option.textContent = artist;
-    artistSelect.appendChild(option);
-}
-
-function updateAlbums() {
-    const artist = artistSelect.value;
-    albumSelect.innerHTML = '';
-    library[artist].forEach(album => {
+    // Populate artist dropdown
+    for (const artist in library) {
         const option = document.createElement('option');
-        option.value = album;
-        option.textContent = album;
-        albumSelect.appendChild(option);
-    });
-    updateSongs();
-}
+        option.value = artist;
+        option.textContent = artist;
+        artistSelect.appendChild(option);
+    }
 
-async function updateSongs() {
-    const artist = artistSelect.value;
-    const album = albumSelect.value;
-
-    try {
-        const response = await fetch(`artists/${sanitizeName(artist)}/${sanitizeName(album)}/songs.json`);
-        const data = await response.json();
-
-        albumCover.src = `artists/${sanitizeName(artist)}/${sanitizeName(album)}/${data.cover}`;
-
-        trackList.innerHTML = '';
-        data.songs.forEach((song, index) => {
-            const trackDiv = document.createElement('div');
-            trackDiv.className = 'track';
-            trackDiv.textContent = `${index + 1}. ${song.title}`;
-            trackDiv.dataset.src = song.src;
-            trackDiv.addEventListener('click', () => loadAudio(`artists/${sanitizeName(artist)}/${sanitizeName(album)}/${song.src}`));
-            trackList.appendChild(trackDiv);
+    function updateAlbums() {
+        const artist = artistSelect.value;
+        albumSelect.innerHTML = '';
+        library[artist].forEach(album => {
+            const option = document.createElement('option');
+            option.value = album;
+            option.textContent = album;
+            albumSelect.appendChild(option);
         });
+        updateSongs();
+    }
 
-        if (data.songs.length > 0) {
-            loadAudio(`artists/${sanitizeName(artist)}/${sanitizeName(album)}/${data.songs[0].src}`);
+    async function updateSongs() {
+        const artist = artistSelect.value;
+        const album = albumSelect.value;
+
+        try {
+            const response = await fetch(`artists/${sanitizeName(artist)}/${sanitizeName(album)}/songs.json`);
+            const data = await response.json();
+
+            albumCover.src = `artists/${sanitizeName(artist)}/${sanitizeName(album)}/${data.cover}`;
+
+            // Populate tracklist
+            trackList.innerHTML = '';
+            data.songs.forEach((song, index) => {
+                const trackDiv = document.createElement('div');
+                trackDiv.className = 'track';
+                trackDiv.textContent = `${index + 1}. ${song.title}`;
+                trackDiv.dataset.src = song.src;
+                trackDiv.addEventListener('click', () => {
+                    audioSource.src = `artists/${sanitizeName(artist)}/${sanitizeName(album)}/${song.src}`;
+                    player.load();
+                    player.play();
+                });
+                trackList.appendChild(trackDiv);
+            });
+
+            // Auto-play first track
+            if (data.songs.length > 0) {
+                audioSource.src = `artists/${sanitizeName(artist)}/${sanitizeName(album)}/${data.songs[0].src}`;
+                player.load();
+            }
+
+        } catch (err) {
+            console.error("Failed to load songs.json:", err);
         }
-
-    } catch (err) {
-        console.error("Failed to load songs.json:", err);
     }
-}
 
-artistSelect.addEventListener('change', updateAlbums);
-albumSelect.addEventListener('change', updateSongs);
+    artistSelect.addEventListener('change', updateAlbums);
+    albumSelect.addEventListener('change', updateSongs);
 
-artistSelect.selectedIndex = 0;
-updateAlbums();
-
-// --- Web Audio API Player ---
-async function loadAudio(url) {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    const response = await fetch(url);
-    const arrayBuffer = await response.arrayBuffer();
-    buffer = await audioCtx.decodeAudioData(arrayBuffer);
-
-    if (sourceNode) sourceNode.disconnect();
-    sourceNode = audioCtx.createBufferSource();
-    sourceNode.buffer = buffer;
-
-    gainNode = audioCtx.createGain();
-
-    // EQ nodes
-    eqNodes.low = audioCtx.createBiquadFilter();
-    eqNodes.low.type = "lowshelf";
-    eqNodes.low.frequency.value = 200;
-    eqNodes.mid = audioCtx.createBiquadFilter();
-    eqNodes.mid.type = "peaking";
-    eqNodes.mid.frequency.value = 1000;
-    eqNodes.mid.Q.value = 1;
-    eqNodes.high = audioCtx.createBiquadFilter();
-    eqNodes.high.type = "highshelf";
-    eqNodes.high.frequency.value = 5000;
-
-    // Pitch Node
-    pitchNode = audioCtx.createGain(); // placeholder for pitch control via playbackRate
-
-    // Connect nodes
-    sourceNode.connect(eqNodes.low);
-    eqNodes.low.connect(eqNodes.mid);
-    eqNodes.mid.connect(eqNodes.high);
-    eqNodes.high.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    sourceNode.playbackRate.value = speedControl.value;
-    isPlaying = false;
-}
-
-// --- Play/Pause Icon Toggle ---
-playPauseBtn.addEventListener('click', () => {
-    if (!buffer) return;
-    if (!isPlaying) {
-        sourceNode.start(0);
-        isPlaying = true;
-        playIcon.innerHTML = '<rect x="5" y="3" width="4" height="18"></rect><rect x="15" y="3" width="4" height="18"></rect>';
-    } else {
-        sourceNode.stop();
-        isPlaying = false;
-        playIcon.innerHTML = '<polygon points="5,3 19,12 5,21"></polygon>';
-    }
-});
-
-// --- Controls ---
-volumeControl.addEventListener('input', () => gainNode.gain.value = volumeControl.value);
-eqLow.addEventListener('input', () => eqNodes.low.gain.value = eqLow.value);
-eqMid.addEventListener('input', () => eqNodes.mid.gain.value = eqMid.value);
-eqHigh.addEventListener('input', () => eqNodes.high.gain.value = eqHigh.value);
-
-speedControl.addEventListener('input', () => {
-    if (sourceNode) sourceNode.playbackRate.value = speedControl.value;
-});
-
-pitchControl.addEventListener('input', () => {
-    if (sourceNode) {
-        // 1 semitone = 100 cents; playbackRate = 2^(cents/1200)
-        sourceNode.playbackRate.value = speedControl.value * Math.pow(2, pitchControl.value / 1200);
-    }
-});
-
-// --- Panel toggles ---
-document.getElementById('toggleEQ').addEventListener('click', () => {
-    eqPanel.classList.toggle('hidden');
-    document.querySelector('#toggleEQ .arrow').classList.toggle('rotated');
-});
-document.getElementById('toggleSpeedPitch').addEventListener('click', () => {
-    speedPitchPanel.classList.toggle('hidden');
-    document.querySelector('#toggleSpeedPitch .arrow').classList.toggle('rotated');
-});
+    // Initialize
+    artistSelect.selectedIndex = 0;
+    updateAlbums();
 </script>
 
 </body>
