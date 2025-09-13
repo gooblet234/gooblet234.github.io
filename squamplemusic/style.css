@@ -1,3 +1,4 @@
+/* --- Basic Layout --- */
 body {
     margin: 0;
     background-color: #121212;
@@ -37,19 +38,20 @@ h3 {
 }
 
 .album-cover {
-    width: 300px;             /* fixed width */
-    height: 300px;            /* fixed height */
-    border-radius: 15px;      
+    width: 300px;
+    height: 300px;
+    border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-    display: block;           
-    margin: 0 auto 20px auto; 
-    object-fit: cover;        /* fill without stretching */
-    background-color: #222;   /* placeholder background */
+    display: block;
+    margin: 0 auto 20px auto;
+    object-fit: cover;
+    background-color: #222;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 50%;     /* scales the placeholder icon */
+    background-size: 50%;
 }
 
+/* --- Dropdowns --- */
 .selectors {
     display: flex;
     flex-wrap: wrap;
@@ -79,15 +81,7 @@ select:hover {
     background-color: #333;
 }
 
-.audio-player {
-    width: 100%;
-    max-width: 400px;
-    outline: none;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-/* Tracklist styling */
+/* --- Tracklist --- */
 .tracklist {
     background-color: #1f1f1f;
     border-radius: 10px;
@@ -109,4 +103,104 @@ select:hover {
 
 .track:active {
     background-color: #555;
+}
+
+/* --- Custom Player --- */
+#customPlayer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn svg {
+    width: 36px;
+    height: 36px;
+    transition: all 0.2s ease;
+    fill: #fff;
+}
+
+/* --- Sliders --- */
+input[type=range] {
+    -webkit-appearance: none;
+    width: 150px;
+    height: 6px;
+    border-radius: 5px;
+    background: #333;
+    outline: none;
+    transition: background 0.2s;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+}
+
+input[type=range]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+}
+
+/* --- Panels --- */
+.panel-btn {
+    background: #1f1f1f;
+    border: none;
+    color: #fff;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: bold;
+}
+
+.panel-btn:hover {
+    background: #333;
+}
+
+#eqPanel, #pitchPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 5px;
+    padding: 10px;
+    background-color: #1f1f1f;
+    border-radius: 5px;
+}
+
+.hidden {
+    display: none;
+}
+
+label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+}
+
+/* --- Arrow rotation --- */
+.rotated {
+    display: inline-block;
+    transform: rotate(180deg);
+    transition: transform 0.2s;
 }
