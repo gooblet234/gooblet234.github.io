@@ -34,18 +34,22 @@
 
         <!-- Custom Audio Player -->
         <div id="customPlayer">
-            <button id="playPause">Play</button>
+            <button id="playPause" class="icon-btn">
+                <svg id="playIcon" width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <polygon points="5,3 19,12 5,21"></polygon>
+                </svg>
+            </button>
             <input id="volume" type="range" min="0" max="1" step="0.01" value="0.8">
             <button id="toggleEQ">EQ</button>
             <button id="togglePitch">Speed/Pitch</button>
 
-            <div id="eqPanel">
+            <div id="eqPanel" class="hidden">
                 <label>Low: <input type="range" min="-30" max="30" value="0" id="eqLow"></label>
                 <label>Mid: <input type="range" min="-30" max="30" value="0" id="eqMid"></label>
                 <label>High: <input type="range" min="-30" max="30" value="0" id="eqHigh"></label>
             </div>
 
-            <div id="pitchPanel">
+            <div id="pitchPanel" class="hidden">
                 <label>Speed: <input type="range" min="0.5" max="2" value="1" step="0.01" id="speedControl"></label>
             </div>
         </div>
@@ -69,6 +73,7 @@ let audioCtx, sourceNode, gainNode, eqNodes = {}, buffer;
 let isPlaying = false;
 
 const playPauseBtn = document.getElementById('playPause');
+const playIcon = document.getElementById('playIcon');
 const volumeControl = document.getElementById('volume');
 const eqLow = document.getElementById('eqLow');
 const eqMid = document.getElementById('eqMid');
@@ -177,13 +182,19 @@ async function loadAudio(url) {
     isPlaying = false;
 }
 
+// --- Play/Pause Icon Toggle ---
 playPauseBtn.addEventListener('click', () => {
+    if (!buffer) return;
     if (!isPlaying) {
-        sourceNode.start();
+        sourceNode.start(0);
         isPlaying = true;
+        // Switch to pause icon
+        playIcon.innerHTML = '<rect x="5" y="3" width="4" height="18"></rect><rect x="15" y="3" width="4" height="18"></rect>';
     } else {
         sourceNode.stop();
         isPlaying = false;
+        // Switch back to play icon
+        playIcon.innerHTML = '<polygon points="5,3 19,12 5,21"></polygon>';
     }
 });
 
