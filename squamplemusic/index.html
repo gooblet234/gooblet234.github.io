@@ -56,10 +56,11 @@
     const trackList = document.getElementById('trackList');
 
     function sanitizeName(name) {
-        return name
-            .toLowerCase()                       // lowercase
-            .replace(/[^a-z0-9]+/g, '-')         // replace non-alphanumerics with dash
-            .replace(/^-+|-+$/g, '');            // remove leading/trailing dashes
+    return name
+        .replace(/'/g, '')                   // remove all apostrophes
+        .toLowerCase()                       // lowercase
+        .replace(/[^a-z0-9]+/g, '-')         // replace everything else with dash
+        .replace(/^-+|-+$/g, '');            // remove leading/trailing dashes
     }
 
     // Populate artist dropdown
