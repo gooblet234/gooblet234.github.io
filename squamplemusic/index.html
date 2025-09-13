@@ -20,12 +20,6 @@
         <!-- Album cover -->
         <img id="albumCover" src="" alt="Album Cover" class="album-cover">
 
-        <!-- Now Playing -->
-        <div class="now-playing">
-            <h2 id="currentSong">No song playing</h2>
-            <p id="currentFile">–</p>
-        </div>
-
         <!-- Dropdowns -->
         <div class="selectors">
             <div class="selector">
@@ -75,13 +69,9 @@ const artistSelect = document.getElementById('artistSelect');
 const albumSelect = document.getElementById('albumSelect');
 const albumCover = document.getElementById('albumCover');
 const trackList = document.getElementById('trackList');
-const currentSong = document.getElementById('currentSong');
-const currentFile = document.getElementById('currentFile');
 
 let audioCtx, sourceNode, gainNode, eqNodes = {}, pitchNode, buffer;
 let isPlaying = false;
-let songs = [];
-let currentIndex = 0;
 
 const playPauseBtn = document.getElementById('playPause');
 const playIcon = document.getElementById('playIcon');
@@ -134,23 +124,17 @@ async function updateSongs() {
         albumCover.src = `artists/${sanitizeName(artist)}/${sanitizeName(album)}/${data.cover}`;
 
         trackList.innerHTML = '';
-        songs = data.songs;
-
         data.songs.forEach((song, index) => {
             const trackDiv = document.createElement('div');
             trackDiv.className = 'track';
             trackDiv.textContent = `${index + 1}. ${song.title}`;
             trackDiv.dataset.src = song.src;
-            trackDiv.addEventListener('click', () => {
-                currentIndex = index;
-                loadAudio(`artists/${sanitizeName(artist)}/${sanitizeName(album)}/${song.src}`, song.title);
-            });
+            trackDiv.addEventListener('click', () => loadAudio(`artists/${sanitizeName(artist)}/${sanitizeName(album)}/${song.src}`));
             trackList.appendChild(trackDiv);
         });
 
         if (data.songs.length > 0) {
-            currentIndex = 0;
-            loadAudio(`artists/${sanitizeName(artist)}/${sanitizeName(album)}/${data.songs[0].src}`, data.songs[0].title);
+            loadAudio(`artists/${sanitizeName(artist)}/${sanitizeName(album)}/${data.songs[0].src}`);
         }
 
     } catch (err) {
@@ -165,7 +149,7 @@ artistSelect.selectedIndex = 0;
 updateAlbums();
 
 // --- Web Audio API Player ---
-async function loadAudio(url, title) {
+async function loadAudio(url) {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     const response = await fetch(url);
@@ -190,7 +174,8 @@ async function loadAudio(url, title) {
     eqNodes.high.type = "highshelf";
     eqNodes.high.frequency.value = 5000;
 
-    pitchNode = audioCtx.createGain(); 
+    // Pitch Node
+    pitchNode = audioCtx.createGain(); // placeholder for pitch control via playbackRate
 
     // Connect nodes
     sourceNode.connect(eqNodes.low);
@@ -200,44 +185,20 @@ async function loadAudio(url, title) {
     gainNode.connect(audioCtx.destination);
 
     sourceNode.playbackRate.value = speedControl.value;
-
-    // Update "Now Playing"
-    currentSong.textContent = title;
-    currentFile.textContent = url.split('/').pop();
-
-    // Autoplay
-    sourceNode.onended = () => {
-        currentIndex++;
-        if (currentIndex >= songs.length) currentIndex = 0;
-        const nextSong = songs[currentIndex];
-        loadAudio(`artists/${sanitizeName(artistSelect.value)}/${sanitizeName(albumSelect.value)}/${nextSong.src}`, nextSong.title);
-        playAudio();
-    };
-
     isPlaying = false;
-}
-
-function playAudio() {
-    if (!buffer) return;
-    if (isPlaying) return;
-    sourceNode.start(0);
-    isPlaying = true;
-    playIcon.innerHTML = '<rect x="5" y="3" width="4" height="18"></rect><rect x="15" y="3" width="4" height="18"></rect>';
-}
-
-function stopAudio() {
-    if (!isPlaying) return;
-    sourceNode.stop();
-    isPlaying = false;
-    playIcon.innerHTML = '<polygon points="5,3 19,12 5,21"></polygon>';
 }
 
 // --- Play/Pause Icon Toggle ---
 playPauseBtn.addEventListener('click', () => {
+    if (!buffer) return;
     if (!isPlaying) {
-        playAudio();
+        sourceNode.start(0);
+        isPlaying = true;
+        playIcon.innerHTML = '<rect x="5" y="3" width="4" height="18"></rect><rect x="15" y="3" width="4" height="18"></rect>';
     } else {
-        stopAudio();
+        sourceNode.stop();
+        isPlaying = false;
+        playIcon.innerHTML = '<polygon points="5,3 19,12 5,21"></polygon>';
     }
 });
 
@@ -253,6 +214,7 @@ speedControl.addEventListener('input', () => {
 
 pitchControl.addEventListener('input', () => {
     if (sourceNode) {
+        // 1 semitone = 100 cents; playbackRate = 2^(cents/1200)
         sourceNode.playbackRate.value = speedControl.value * Math.pow(2, pitchControl.value / 1200);
     }
 });
