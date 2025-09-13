@@ -1,0 +1,15 @@
+{
+  "cover": "cover.jpg",
+  "songs": [
+    { "title": "Big Poe", "src": "song1.mp3" },
+    { "title": "SUGAR ON MY TONGUE", "src": "song2.mp3" },
+    { "title": "SUCKA FREE", "src": "song3.mp3" },
+    { "title": "Mommanem", "src": "song4.mp3" },
+    { "title": "STOP PLAYING WITH ME", "src": "song5.mp3" },
+    { "title": "Ring Ring Ring", "src": "song6.mp3" },
+    { "title": "Don't Tap That Glass/Tweakin'", "src": "song7.mp3" },
+    { "title": "Don't You Worry Baby", "src": "song8.mp3" },
+    { "title": "I'll Take Care of You", "src": "song9.mp3" },
+    { "title": "Tell Me What It Is", "src": "song10.mp3" }
+  ]
+}

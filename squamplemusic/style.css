@@ -37,12 +37,17 @@ h3 {
 }
 
 .album-cover {
-    width: 100%;
-    max-width: 300px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-    margin: 0 auto 20px auto;
-    display: block;
+    width: 300px;             /* fixed width */
+    height: 300px;            /* fixed height */
+    border-radius: 15px;      
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    display: block;           
+    margin: 0 auto 20px auto; 
+    object-fit: cover;        /* fill without stretching */
+    background-color: #222;   /* placeholder background */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 50%;     /* scales the placeholder icon */
 }
 
 .selectors {

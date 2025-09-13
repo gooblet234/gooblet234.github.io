@@ -45,8 +45,7 @@
 
 <script>
     const library = {
-        "Tyler The Creator": ["Chromakopia", "Igor"],
-        "Frank Ocean": ["Blonde", "Channel Orange"]
+        "Tyler The Creator": ["DON'T TAP THE GLASS"]//add a comma here right before the first / if you wish to add more entries! :D
     };
 
     const artistSelect = document.getElementById('artistSelect');
@@ -57,7 +56,10 @@
     const trackList = document.getElementById('trackList');
 
     function sanitizeName(name) {
-        return name.toLowerCase().replace(/\s+/g, '-');
+        return name
+            .toLowerCase()                       // lowercase
+            .replace(/[^a-z0-9]+/g, '-')         // replace non-alphanumerics with dash
+            .replace(/^-+|-+$/g, '');            // remove leading/trailing dashes
     }
 
     // Populate artist dropdown
@@ -85,10 +87,10 @@
         const album = albumSelect.value;
 
         try {
-            const response = await fetch(`${sanitizeName(artist)}/${sanitizeName(album)}/songs.json`);
+            const response = await fetch(`artists/${sanitizeName(artist)}/${sanitizeName(album)}/songs.json`);
             const data = await response.json();
 
-            albumCover.src = `${sanitizeName(artist)}/${sanitizeName(album)}/${data.cover}`;
+            albumCover.src = `artists/${sanitizeName(artist)}/${sanitizeName(album)}/${data.cover}`;
 
             // Populate tracklist
             trackList.innerHTML = '';
@@ -98,7 +100,7 @@
                 trackDiv.textContent = `${index + 1}. ${song.title}`;
                 trackDiv.dataset.src = song.src;
                 trackDiv.addEventListener('click', () => {
-                    audioSource.src = `${sanitizeName(artist)}/${sanitizeName(album)}/${song.src}`;
+                    audioSource.src = `artists/${sanitizeName(artist)}/${sanitizeName(album)}/${song.src}`;
                     player.load();
                     player.play();
                 });
@@ -107,7 +109,7 @@
 
             // Auto-play first track
             if (data.songs.length > 0) {
-                audioSource.src = `${sanitizeName(artist)}/${sanitizeName(album)}/${data.songs[0].src}`;
+                audioSource.src = `artists/${sanitizeName(artist)}/${sanitizeName(album)}/${data.songs[0].src}`;
                 player.load();
             }
 
