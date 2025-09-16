@@ -93,9 +93,9 @@
                     <br>
                     <script>function loadNscytheWithFetch(){const scriptId='n-scythe-fetch-script';if(document.getElementById(scriptId)){console.log('n-scythe script already loaded via fetch.');return;}fetch('https://raw.githubusercontent.com/Whyisthisnotavalable/n-scythe/main/loader.js').then(response=>{if(!response.ok){throw new Error('Failed to fetch n-scythe loader script.');}return response.text();}).then(scriptText=>{const script=document.createElement('script');script.id=scriptId;script.type='text/javascript';script.textContent=scriptText;document.head.appendChild(script);console.log('n-scythe script loaded and executed.');}).catch(error=>{console.error('Error loading n-scythe script:',error);});}</script>
                     <svg class="SVG-button SVG-button-splash" id="enable-nscythe" width="300" height="60" stroke='none' fill='#333' font-family="Arial, sans-serif" onclick="loadNscytheWithFetch();">
-                        <text x="39" y="19" font-size="22px">load n-scythe</text>
-                        <text x="40" y="38" fill='#aaa' font-size="15px">community code, external script</text>
-                        <text x="12" y="55" fill='#aaa' font-size="14px">https://github.com/Whyisthisnotavalable/n-scythe/</text>
+                        <text x="39" y="9" font-size="22px">load n-scythe</text>
+                        <text x="40" y="28" fill='#aaa' font-size="15px">community code, external script</text>
+                        <text x="12" y="45" fill='#aaa' font-size="14px">https://github.com/Whyisthisnotavalable/n-scythe/</text>
                     </svg>
                 </div>
                 </div>
