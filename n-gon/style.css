@@ -62,6 +62,13 @@ em {
     opacity: 0.7;
 }
 
+.button-container {
+    display: flex;
+    flex-direction: column; 
+    gap: 15px;
+    padding-top: 20px; 
+}
+
 #splash {
     user-select: none;
     position: absolute;
