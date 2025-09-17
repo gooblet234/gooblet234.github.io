@@ -21,7 +21,7 @@ function l(id) { return document.getElementById(id); } // element identified by 
 function exists(o) { return o != null && o != undefined; } // true if object is defined
 function choose(arr) { return arr[ Math.floor(Math.random() * arr.length) ]; } // returns a random item from arr
 
-const icons = 'https://raw.githubusercontent.com/mrbuilder1961/mrbuilder1961.github.io/main/mods/other_icons.png';
+const icons = 'https://raw.githubusercontent.com/gooblet234/gooblet234.github.io/main/mods/other_icons.png';
 const red = 'color:#fb5a71;';
 const meaty = 'color:#d6502c;';
 const gold = 'color:#ffd966;';
