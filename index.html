@@ -14,7 +14,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
 <body>changes every friday. Consult me in person or thru text to get new password.</body><br>
 <form>
   <input name="pass" id="pass" type="password" placeholder="secret password" required>
-  <input type="button" value="Submit" onclick="myFunction()">
+  <input name="pass" id="pass2" type="password" placeholder="verification password" required>
+  <input type="button" value="Submit" onclick="myFunction(); myFunction2();">
 </form> 
 
 
@@ -33,6 +34,24 @@ function myFunction() {
 
   if (encodedPasswords.includes(encodedInput)) {
     sessionStorage.setItem('password', encodedInput);
+  } else {
+    alert("Password is incorrect.");
+  }
+}
+function myFunction2() {
+  const encodedPasswords = ["cGll"];
+
+  const userInput = document.getElementById("pass").value;
+
+  if (userInput.trim() === "") {
+    alert("Please enter the second password.");
+    return;
+  }
+
+  const encodedInput = btoa(userInput);
+
+  if (encodedPasswords.includes(encodedInput)) {
+    sessionStorage.setItem('password2', encodedInput);
     window.location.href = "main.html";
   } else {
     alert("Password is incorrect.");
