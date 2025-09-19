@@ -1,6 +1,6 @@
   window.addEventListener('DOMContentLoaded', (event) => {
     const encodedPasswords = ["MjM0MTQyMzQ=", "R01TMjAyNQ==", "bGltYnVzY29tcGFueQ==", "bWFpbnRlbmFuY2VmcmlkYXk="];
-    const encodedPasswords2 = ["cGll"];
+    const encodedPasswords2 = ["cGll", "Y3Vt"];
     
     const storedPassword = sessionStorage.getItem('password');
     const storedPassword2 = sessionStorage.getItem('password2');
